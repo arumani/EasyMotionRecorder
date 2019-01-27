@@ -9,6 +9,7 @@ http://opensource.org/licenses/mit-license.php
 
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 #if UNITY_EDITOR
@@ -172,144 +173,169 @@ namespace Entum
             AssetDatabase.SaveAssets();
         }
 
-        //Humanoidなanimファイルとして出力する。
+        //Humanoidなanimファイルとして出力する。（全てのMuscle）
         [ContextMenu("Export as Humanoid animation clips")]
-        public void ExportHumanoidAnim()
+        public void ExportHumanoidAnimAll()
+        {
+            ExportHumanoidAnim(new HashSet<int>(), true);
+        }
+
+        //Humanoidなanimファイルとして出力する。（指のMuscleのみ）
+        [ContextMenu("Export as Humanoid animation clips (only Fingers)")]
+        public void ExportHumanoidAnimFingers()
+        {
+            var indexesWithoutFingers = new HashSet<int>(Enumerable.Range(0, HumanTrait.MuscleCount));
+            indexesWithoutFingers.ExceptWith(CreateFingerIndexes());
+            ExportHumanoidAnim(indexesWithoutFingers, false);
+        }
+
+        //Humanoidなanimファイルとして出力する。（指のMuscle以外）
+        [ContextMenu("Export as Humanoid animation clips (exclude Fingers)")]
+        public void ExportHumanoidAnimWithoutFingers()
+        {
+            ExportHumanoidAnim(CreateFingerIndexes(), true);
+        }
+
+        private void ExportHumanoidAnim(ISet<int> excludeMuscleIndexes, bool includePositionAndRotation)
         {
             var clip = new AnimationClip { frameRate = 30 };
             AnimationUtility.SetAnimationClipSettings(clip, new AnimationClipSettings { loopTime = false });
 
-
-            // body position
+            if(includePositionAndRotation)
             {
-                var curveX = new AnimationCurve();
-                var curveY = new AnimationCurve();
-                var curveZ = new AnimationCurve();
-                foreach (var item in Poses)
+                // body position
                 {
-                    curveX.AddKey(item.Time, item.BodyPosition.x);
-                    curveY.AddKey(item.Time, item.BodyPosition.y);
-                    curveZ.AddKey(item.Time, item.BodyPosition.z);
-                }
+                    var curveX = new AnimationCurve();
+                    var curveY = new AnimationCurve();
+                    var curveZ = new AnimationCurve();
+                    foreach (var item in Poses)
+                    {
+                        curveX.AddKey(item.Time, item.BodyPosition.x);
+                        curveY.AddKey(item.Time, item.BodyPosition.y);
+                        curveZ.AddKey(item.Time, item.BodyPosition.z);
+                    }
 
-                const string muscleX = "RootT.x";
-                clip.SetCurve("", typeof(Animator), muscleX, curveX);
-                const string muscleY = "RootT.y";
-                clip.SetCurve("", typeof(Animator), muscleY, curveY);
-                const string muscleZ = "RootT.z";
-                clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
-            }
-            // Leftfoot position
-            {
-                var curveX = new AnimationCurve();
-                var curveY = new AnimationCurve();
-                var curveZ = new AnimationCurve();
-                foreach (var item in Poses)
+                    const string muscleX = "RootT.x";
+                    clip.SetCurve("", typeof(Animator), muscleX, curveX);
+                    const string muscleY = "RootT.y";
+                    clip.SetCurve("", typeof(Animator), muscleY, curveY);
+                    const string muscleZ = "RootT.z";
+                    clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
+                }
+                // Leftfoot position
                 {
-                    curveX.AddKey(item.Time, item.LeftfootIK_Pos.x);
-                    curveY.AddKey(item.Time, item.LeftfootIK_Pos.y);
-                    curveZ.AddKey(item.Time, item.LeftfootIK_Pos.z);
-                }
+                    var curveX = new AnimationCurve();
+                    var curveY = new AnimationCurve();
+                    var curveZ = new AnimationCurve();
+                    foreach (var item in Poses)
+                    {
+                        curveX.AddKey(item.Time, item.LeftfootIK_Pos.x);
+                        curveY.AddKey(item.Time, item.LeftfootIK_Pos.y);
+                        curveZ.AddKey(item.Time, item.LeftfootIK_Pos.z);
+                    }
 
-                const string muscleX = "LeftFootT.x";
-                clip.SetCurve("", typeof(Animator), muscleX, curveX);
-                const string muscleY = "LeftFootT.y";
-                clip.SetCurve("", typeof(Animator), muscleY, curveY);
-                const string muscleZ = "LeftFootT.z";
-                clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
-            }
-            // Rightfoot position
-            {
-                var curveX = new AnimationCurve();
-                var curveY = new AnimationCurve();
-                var curveZ = new AnimationCurve();
-                foreach (var item in Poses)
+                    const string muscleX = "LeftFootT.x";
+                    clip.SetCurve("", typeof(Animator), muscleX, curveX);
+                    const string muscleY = "LeftFootT.y";
+                    clip.SetCurve("", typeof(Animator), muscleY, curveY);
+                    const string muscleZ = "LeftFootT.z";
+                    clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
+                }
+                // Rightfoot position
                 {
-                    curveX.AddKey(item.Time, item.RightfootIK_Pos.x);
-                    curveY.AddKey(item.Time, item.RightfootIK_Pos.y);
-                    curveZ.AddKey(item.Time, item.RightfootIK_Pos.z);
-                }
+                    var curveX = new AnimationCurve();
+                    var curveY = new AnimationCurve();
+                    var curveZ = new AnimationCurve();
+                    foreach (var item in Poses)
+                    {
+                        curveX.AddKey(item.Time, item.RightfootIK_Pos.x);
+                        curveY.AddKey(item.Time, item.RightfootIK_Pos.y);
+                        curveZ.AddKey(item.Time, item.RightfootIK_Pos.z);
+                    }
 
-                const string muscleX = "RightFootT.x";
-                clip.SetCurve("", typeof(Animator), muscleX, curveX);
-                const string muscleY = "RightFootT.y";
-                clip.SetCurve("", typeof(Animator), muscleY, curveY);
-                const string muscleZ = "RightFootT.z";
-                clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
-            }
-            // body rotation
-            {
-                var curveX = new AnimationCurve();
-                var curveY = new AnimationCurve();
-                var curveZ = new AnimationCurve();
-                var curveW = new AnimationCurve();
-                foreach (var item in Poses)
+                    const string muscleX = "RightFootT.x";
+                    clip.SetCurve("", typeof(Animator), muscleX, curveX);
+                    const string muscleY = "RightFootT.y";
+                    clip.SetCurve("", typeof(Animator), muscleY, curveY);
+                    const string muscleZ = "RightFootT.z";
+                    clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
+                }
+                // body rotation
                 {
-                    curveX.AddKey(item.Time, item.BodyRotation.x);
-                    curveY.AddKey(item.Time, item.BodyRotation.y);
-                    curveZ.AddKey(item.Time, item.BodyRotation.z);
-                    curveW.AddKey(item.Time, item.BodyRotation.w);
-                }
+                    var curveX = new AnimationCurve();
+                    var curveY = new AnimationCurve();
+                    var curveZ = new AnimationCurve();
+                    var curveW = new AnimationCurve();
+                    foreach (var item in Poses)
+                    {
+                        curveX.AddKey(item.Time, item.BodyRotation.x);
+                        curveY.AddKey(item.Time, item.BodyRotation.y);
+                        curveZ.AddKey(item.Time, item.BodyRotation.z);
+                        curveW.AddKey(item.Time, item.BodyRotation.w);
+                    }
 
-                const string muscleX = "RootQ.x";
-                clip.SetCurve("", typeof(Animator), muscleX, curveX);
-                const string muscleY = "RootQ.y";
-                clip.SetCurve("", typeof(Animator), muscleY, curveY);
-                const string muscleZ = "RootQ.z";
-                clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
-                const string muscleW = "RootQ.w";
-                clip.SetCurve("", typeof(Animator), muscleW, curveW);
-            }
-            // Leftfoot rotation
-            {
-                var curveX = new AnimationCurve();
-                var curveY = new AnimationCurve();
-                var curveZ = new AnimationCurve();
-                var curveW = new AnimationCurve();
-                foreach (var item in Poses)
+                    const string muscleX = "RootQ.x";
+                    clip.SetCurve("", typeof(Animator), muscleX, curveX);
+                    const string muscleY = "RootQ.y";
+                    clip.SetCurve("", typeof(Animator), muscleY, curveY);
+                    const string muscleZ = "RootQ.z";
+                    clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
+                    const string muscleW = "RootQ.w";
+                    clip.SetCurve("", typeof(Animator), muscleW, curveW);
+                }
+                // Leftfoot rotation
                 {
-                    curveX.AddKey(item.Time, item.LeftfootIK_Rot.x);
-                    curveY.AddKey(item.Time, item.LeftfootIK_Rot.y);
-                    curveZ.AddKey(item.Time, item.LeftfootIK_Rot.z);
-                    curveW.AddKey(item.Time, item.LeftfootIK_Rot.w);
-                }
+                    var curveX = new AnimationCurve();
+                    var curveY = new AnimationCurve();
+                    var curveZ = new AnimationCurve();
+                    var curveW = new AnimationCurve();
+                    foreach (var item in Poses)
+                    {
+                        curveX.AddKey(item.Time, item.LeftfootIK_Rot.x);
+                        curveY.AddKey(item.Time, item.LeftfootIK_Rot.y);
+                        curveZ.AddKey(item.Time, item.LeftfootIK_Rot.z);
+                        curveW.AddKey(item.Time, item.LeftfootIK_Rot.w);
+                    }
 
-                const string muscleX = "LeftFootQ.x";
-                clip.SetCurve("", typeof(Animator), muscleX, curveX);
-                const string muscleY = "LeftFootQ.y";
-                clip.SetCurve("", typeof(Animator), muscleY, curveY);
-                const string muscleZ = "LeftFootQ.z";
-                clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
-                const string muscleW = "LeftFootQ.w";
-                clip.SetCurve("", typeof(Animator), muscleW, curveW);
-            }
-            // Rightfoot rotation
-            {
-                var curveX = new AnimationCurve();
-                var curveY = new AnimationCurve();
-                var curveZ = new AnimationCurve();
-                var curveW = new AnimationCurve();
-                foreach (var item in Poses)
+                    const string muscleX = "LeftFootQ.x";
+                    clip.SetCurve("", typeof(Animator), muscleX, curveX);
+                    const string muscleY = "LeftFootQ.y";
+                    clip.SetCurve("", typeof(Animator), muscleY, curveY);
+                    const string muscleZ = "LeftFootQ.z";
+                    clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
+                    const string muscleW = "LeftFootQ.w";
+                    clip.SetCurve("", typeof(Animator), muscleW, curveW);
+                }
+                // Rightfoot rotation
                 {
-                    curveX.AddKey(item.Time, item.RightfootIK_Rot.x);
-                    curveY.AddKey(item.Time, item.RightfootIK_Rot.y);
-                    curveZ.AddKey(item.Time, item.RightfootIK_Rot.z);
-                    curveW.AddKey(item.Time, item.RightfootIK_Rot.w);
-                }
+                    var curveX = new AnimationCurve();
+                    var curveY = new AnimationCurve();
+                    var curveZ = new AnimationCurve();
+                    var curveW = new AnimationCurve();
+                    foreach (var item in Poses)
+                    {
+                        curveX.AddKey(item.Time, item.RightfootIK_Rot.x);
+                        curveY.AddKey(item.Time, item.RightfootIK_Rot.y);
+                        curveZ.AddKey(item.Time, item.RightfootIK_Rot.z);
+                        curveW.AddKey(item.Time, item.RightfootIK_Rot.w);
+                    }
 
-                const string muscleX = "RightFootQ.x";
-                clip.SetCurve("", typeof(Animator), muscleX, curveX);
-                const string muscleY = "RightFootQ.y";
-                clip.SetCurve("", typeof(Animator), muscleY, curveY);
-                const string muscleZ = "RightFootQ.z";
-                clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
-                const string muscleW = "RightFootQ.w";
-                clip.SetCurve("", typeof(Animator), muscleW, curveW);
+                    const string muscleX = "RightFootQ.x";
+                    clip.SetCurve("", typeof(Animator), muscleX, curveX);
+                    const string muscleY = "RightFootQ.y";
+                    clip.SetCurve("", typeof(Animator), muscleY, curveY);
+                    const string muscleZ = "RightFootQ.z";
+                    clip.SetCurve("", typeof(Animator), muscleZ, curveZ);
+                    const string muscleW = "RightFootQ.w";
+                    clip.SetCurve("", typeof(Animator), muscleW, curveW);
+                }
             }
 
             // muscles
             for (int i = 0; i < HumanTrait.MuscleCount; i++)
             {
+                if(excludeMuscleIndexes.Contains(i)) continue;
+
                 var curve = new AnimationCurve();
                 foreach (var item in Poses)
                 {
@@ -332,6 +358,22 @@ namespace Entum
 
             AssetDatabase.CreateAsset(clip, uniqueAssetPath);
             AssetDatabase.SaveAssets();
+        }
+
+        private ISet<int> CreateFingerIndexes()
+        {
+            var lr = new HashSet<string>(new [] {"Left","Right"});
+            var fingers = new HashSet<string>(new [] {"Thumb", "Index", "Middle", "Ring", "Little"});
+
+            var fingerMuscleIndexes = new HashSet<int>();
+            for(int i = 0; i < HumanTrait.MuscleCount; i++)
+            {
+                var tokens = HumanTrait.MuscleName[i].Split(' ');
+                if(tokens.Length < 2) continue;
+                // 指Muscleの添字を集める
+                if(lr.Contains(tokens[0]) && fingers.Contains(tokens[1])) fingerMuscleIndexes.Add(i);
+            }
+            return fingerMuscleIndexes;
         }
 #endif
 
