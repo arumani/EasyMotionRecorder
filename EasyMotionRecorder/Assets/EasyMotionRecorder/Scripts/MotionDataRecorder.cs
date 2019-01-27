@@ -47,6 +47,9 @@ namespace Entum
         [SerializeField]
         private HumanBodyBones IK_RightFootBone = HumanBodyBones.RightFoot;
 
+        [SerializeField, Tooltip("Humanoid Animationとして利用する場合はチェックを外す事で記録処理の負荷とデータサイズを減らす事ができます")]
+        private bool _recordBoneTrasnform = true;
+
         protected HumanoidPoses Poses;
         protected float RecordedTime;
 
@@ -136,7 +139,9 @@ namespace Entum
                 serializedPose.Muscles[i] = _currentPose.muscles[i];
             }
 
-            SetHumanBoneTransformToHumanoidPoses(_animator, ref serializedPose);
+            if(_recordBoneTrasnform) {
+                SetHumanBoneTransformToHumanoidPoses(_animator, ref serializedPose);
+            }
 
             Poses.Poses.Add(serializedPose);
             FrameIndex++;
